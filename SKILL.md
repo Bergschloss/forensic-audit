@@ -11,9 +11,9 @@ Use this skill when the user invokes `/forensic-audit`, asks to run a "forensic 
 
 ## Description
 
-Three-phase read-only forensic audit of a codebase. Each phase is written to a timestamped report file before the next phase begins. Reports are saved to `%USERPROFILE%\Desktop\_reports\<timestamp>\`.
+Three-phase read-only forensic audit of a codebase. Each phase is written to a timestamped report file before the next phase begins. Reports are saved to `%USERPROFILE%\Desktop\_Reports\<timestamp>\`.
 
-**STRICT READ-ONLY**: Never modify, refactor, or create any files inside the project repository. Only write to the `_reports` output folder.
+**STRICT READ-ONLY**: Never modify, refactor, or create any files inside the project repository. Only write to the `_Reports` output folder.
 
 ---
 
@@ -21,7 +21,7 @@ Three-phase read-only forensic audit of a codebase. Each phase is written to a t
 
 ### Pre-flight (before any phase)
 
-1. **Resolve output path**: `$outDir = "$env:USERPROFILE\Desktop\_reports\$(Get-Date -Format 'yyyy-MM-dd_HHmm')"` — new timestamped subfolder every run to preserve previous audits.
+1. **Resolve output path**: `$outDir = "$env:USERPROFILE\Desktop\_Reports\$(Get-Date -Format 'yyyy-MM-dd_HHmm')"` — new timestamped subfolder every run to preserve previous audits.
 2. **Create output dir**: `mkdir -p "$outDir"` (or equivalent PowerShell command) — confirm creation, abort if it fails.
 3. **Capture repo context** (embed in every report header):
    - Current directory (repo root)
@@ -255,4 +255,4 @@ Finally, output a **combined severity table**:
 - **Fault tolerance**: no top-level `throw Error` fixes that crash Electron / desktop clients. Always propose architectural fallbacks.
 - **Cross-phase dedup**: Phase 2 and 3 must reference Phase 1 findings rather than duplicate them.
 - **Sequential phases**: Phase N+1 starts only after Phase N file is confirmed written and non-empty.
-- **Permission Handling**: If you do not have permission to write directly to `%USERPROFILE%\Desktop\_reports`, request it using `ask_permission` for `write_file` with target `C:\Users\relig\Desktop` or execute the file write operations via the `run_command` tool in PowerShell.
+- **Permission Handling**: If you do not have permission to write directly to `%USERPROFILE%\Desktop\_Reports`, request it using `ask_permission` for `write_file` with target `C:\Users\relig\Desktop` or execute the file write operations via the `run_command` tool in PowerShell.
