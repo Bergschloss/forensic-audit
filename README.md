@@ -1,5 +1,7 @@
 # 🛡️ Forensic Audit Skill
 
+> **Professional Standard:** This framework represents a mature, systematic approach to automating quality control (QA), database integrity, and security auditing. It can be safely adopted as a standard auditing pipeline for any medium-to-large scale commercial projects.
+
 A three-phase, read-only forensic audit protocol designed for AI coding assistants (such as Antigravity, Claude, or other agentic frameworks). This skill guides the agent to systematically search the codebase for security vulnerabilities, race conditions, performance bottlenecks, and system resilience risks.
 
 ## 🌟 What It Does
