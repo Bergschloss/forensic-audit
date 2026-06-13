@@ -30,7 +30,7 @@ The skill defines 3 sequential phases of detailed checking:
 
 For complex backend APIs or infrastructure codebases, doing a single repository scan for security flaws can miss subtle bugs (like a missing `await` before a database transaction or a missing TOTP replay guard). 
 
-To ensure maximum focus and precision, we use a **File-by-File Forensic Audit Pipeline**. The template is provided in [tasks-forensic-example.md](file:///g:/Anti/forensic-audit_repo/tasks-forensic-example.md).
+To ensure maximum focus and precision, we use a **File-by-File Forensic Audit Pipeline**. The template is provided in [tasks-forensic-example.md](./tasks-forensic-example.md).
 
 ### How to use this strategy:
 
