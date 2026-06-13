@@ -24,6 +24,27 @@ The skill defines 3 sequential phases of detailed checking:
 
 ---
 
+## 📋 Orchestrating a File-by-File Forensic Audit (Multi-Agent Pipeline)
+
+For complex backend APIs or infrastructure codebases, doing a single repository scan for security flaws can miss subtle bugs (like a missing `await` before a database transaction or a missing TOTP replay guard). 
+
+To ensure maximum focus and precision, we use a **File-by-File Forensic Audit Pipeline**. The template is provided in [tasks-forensic-example.md](file:///g:/Anti/forensic-audit_repo/tasks-forensic-example.md).
+
+### How to use this strategy:
+
+1. **Ask the Agent to Scan & List:** 
+   Feed the codebase to your AI assistant and ask it to scan the project files, identify all critical security endpoints, database services, schemas, and configurations, and generate a task list formatted like `tasks-forensic-example.md`.
+2. **Sequential Task Execution:**
+   Instruct the orchestrator agent to execute this list **one-by-one**. For each file task, the main agent launches a subagent (or a fresh clean session) to analyze that file. This guarantees that the inspecting agent is completely focused on a single module without prior context pollution.
+3. **File-Specific Reports:**
+   Each subagent reads its assigned file, runs the `/forensic-audit` protocol, and writes its findings directly to a separate report `[NN]_[filename].md`.
+4. **Progress Logging:**
+   The orchestrator updates `00_PROGRESS.md` with finding counts (`CRITICAL`/`HIGH`/`MEDIUM`/`LOW`) after each subagent completes its task.
+5. **Consolidate to Master Report:**
+   Run a final task where the orchestrator merges all individual file reports, deduplicates overlapping issues, and outputs a consolidated `AUDIT_FINAL.md` sorted by severity.
+
+---
+
 ## 💻 Default Technology Stack
 
 The default searches and rules in `SKILL.md` are set up for:
