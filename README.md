@@ -26,6 +26,15 @@ The skill defines 3 sequential phases of detailed checking:
 
 ---
 
+## How to Use
+
+1. **Install:** Save `SKILL.md` into `~/.claude/skills/forensic-audit/SKILL.md` (create the folder if needed). Restart your agent session - the skill becomes available as `/forensic-audit`.
+2. **Invoke with a defined scope:** Trigger it for one file (or one tightly-related file group) at a time - e.g. "/forensic-audit on src/routes/auth.ts". See Scope Discipline in SKILL.md - never point it at an entire repository in one pass.
+3. **Read the report:** Each phase is written to a timestamped report in %USERPROFILE%\Desktop\_Reports\<timestamp>\ - never inside the project repository.
+4. **Auditing a whole codebase?** See "Orchestrating a File-by-File Forensic Audit" below - generate a task list first, then run it one file at a time.
+
+---
+
 ## 📋 Orchestrating a File-by-File Forensic Audit (Multi-Agent Pipeline)
 
 For complex backend APIs or infrastructure codebases, doing a single repository scan for security flaws can miss subtle bugs (like a missing `await` before a database transaction or a missing TOTP replay guard). 
