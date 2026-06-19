@@ -44,15 +44,15 @@ To ensure maximum focus and precision, we use a **File-by-File Forensic Audit Pi
 ### How to use this strategy:
 
 1. **Ask the Agent to Scan & List:** 
-   Feed the codebase to your AI assistant and ask it to scan the project files, identify all critical security endpoints, database services, schemas, and configurations, and generate a task list formatted like `tasks-forensic-example.md`.
-2. **Sequential Task Execution:**
-   Instruct the orchestrator agent to execute this list **one-by-one**. For each file task, the main agent launches a subagent (or a fresh clean session) to analyze that file. This guarantees that the inspecting agent is completely focused on a single module without prior context pollution.
-3. **File-Specific Reports:**
-   Each subagent reads its assigned file, runs the `/forensic-audit` protocol, and writes its findings directly to a separate report `[NN]_[filename].md`.
+   Feed the codebase to your AI assistant and ask it to scan the project files, identify all critical security endpoints, database services, schemas, and configurations, and generate a task list formatted like `tasks-forensic-example.md`. The LLM should determine which files are high-risk (auth, payments, crypto) and mark them for dual-run.
+2. **Parallel Task Execution:**
+   Instruct the orchestrator agent to spawn ALL `runA`/`runB` subagent tasks concurrently in a single batch. Each subagent operates in an isolated context, reads its target file, runs `/forensic-audit`, and writes its `FINAL.md`.
+3. **Pipelined Merging (orchestrator does this directly):**
+   As soon as both `runA` and `runB` for a dual-run scope complete, the orchestrator immediately merges them into `MERGED.md` — keeping the higher severity for shared findings and tagging unique ones. **Do not delegate merges** — the orchestrator handles this faster than spawning another subagent.
 4. **Progress Logging:**
    The orchestrator updates `00_PROGRESS.md` with finding counts (`CRITICAL`/`HIGH`/`MEDIUM`/`LOW`) after each subagent completes its task.
-5. **Consolidate to Master Report:**
-   Run a final task where the orchestrator merges all individual file reports, deduplicates overlapping issues, and outputs a consolidated `AUDIT_FINAL.md` sorted by severity.
+5. **Consolidate to Master Report (orchestrator does this directly):**
+   Once all tasks are done, the orchestrator reads all reports, deduplicates cross-file patterns, and outputs a consolidated `AUDIT_FINAL.md` sorted by severity. **Do not delegate the final merge** — only the orchestrator has full cross-file context for deduplication.
 
 ---
 
