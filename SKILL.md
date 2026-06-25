@@ -1,13 +1,13 @@
 ---
 name: forensic-audit
-description: Three-phase read-only forensic audit of a codebase. Use when the user invokes `/forensic-audit`, asks to run a "forensic audit", "forensic audit pipeline", "multi-pass audit", "security audit", "аудит безпеки", "аудит конвеєр", or "перевір репозиторій на вразливості".
+description: Three-phase read-only forensic audit of a codebase. Use when the user invokes `/forensic-audit`, asks to run a "forensic audit", "forensic audit pipeline", "multi-pass audit", "security audit", "vulnerability scan", "security check", or "code vulnerability scan".
 ---
 
 # Skill: forensic-audit
 
 ## Trigger
 
-Use this skill when the user invokes `/forensic-audit`, asks to run a "forensic audit", "forensic audit pipeline", "multi-pass audit", "security audit", "аудит безпеки", "аудит конвеєр", or "перевір репозиторій на вразливості".
+Use this skill when the user invokes `/forensic-audit`, asks to run a "forensic audit", "forensic audit pipeline", "multi-pass audit", "security audit", "vulnerability scan", "security check", or "code vulnerability scan".
 
 ## Description
 
@@ -222,9 +222,9 @@ HIGH: N | MEDIUM: N | LOW: N
 After all three files are written and verified, output to chat:
 
 ```
-Конвеєр завершено. Збережено в: [outDir]
+Forensic audit completed. Saved to: [outDir]
 
-Створено файли:
+Created files:
 - audit_1_security.md
 - audit_2_database.md
 - audit_3_architecture.md
