@@ -2,77 +2,73 @@
   <img src="images/logo.png" alt="Forensic Audit Logo" width="200" />
 </p>
 
-# 🛡️ Forensic Audit Skill
+# Forensic Audit Skill
 
-> **Professional Standard:** This framework has been validated through 30+ audit runs on a production Turborepo monorepo (Next.js, Fastify, Electron, Prisma/PostgreSQL). It represents a mature, systematic approach to automating QA, database integrity, and security auditing, and can be adopted as a standard auditing pipeline for medium-to-large scale commercial projects.
+A three-phase, read-only forensic audit protocol for AI coding assistants (Claude Code, Antigravity, and compatible agents). Systematically searches a codebase for security vulnerabilities, race conditions, performance bottlenecks, and system resilience risks.
 
-A three-phase, read-only forensic audit protocol designed for AI coding assistants (such as Antigravity, Claude, or other agentic frameworks). This skill guides the agent to systematically search the codebase for security vulnerabilities, race conditions, performance bottlenecks, and system resilience risks.
+Developed against a Turborepo monorepo stack (Fastify, Prisma/PostgreSQL, Electron, Stripe, Twilio). Stack-specific sections are marked and can be adapted for other architectures.
 
-## 🌟 What It Does
+## What It Does
 
-The skill defines 3 sequential phases of detailed checking:
+Three sequential phases:
 
 * **Phase 1: Security, Cryptography & Data Privacy**
-  * **Authentication & Authorization:** Guarding against unauthenticated privilege escalation, validating JWT expiry/refresh rotation (RTR), and protecting against TOTP replay attacks.
-  * **IDOR validation:** Auditing ownership checks on client-scoped endpoints.
-  * **Cryptography & Secret Hygiene:** Checking AES-256 key configuration, Electron `safeStorage`, hardcoded secrets in source files, and GDPR compliance (PII deletion/export).
-  * **Stripe Webhook Security:** Verifying webhook signature validation (`stripe.webhooks.constructEvent`).
+  * Authentication & Authorization: privilege escalation, JWT expiry/refresh rotation (RTR), TOTP replay attacks.
+  * IDOR validation: ownership checks on client-scoped endpoints.
+  * Cryptography & Secret Hygiene: AES-256 key config, Electron `safeStorage`, hardcoded secrets, GDPR PII deletion/export.
+  * Stripe Webhook Security: `stripe.webhooks.constructEvent` signature validation.
 
 * **Phase 2: Database Integrity, Transactions & Performance**
-  * **Race conditions:** Finding TOCTOU (Time-of-Check to Time-of-Use) race conditions and ensuring atomic database transactions for critical updates (e.g. queue acceptance, voucher bookings).
-  * **Query Optimization:** Auditing N+1 query loops, missing database indexes, and unbounded queries.
-  * **Resource leaks:** Checking connection pooling limits and SSE listener cleanup.
+  * Race conditions: TOCTOU races, atomic transactions for queue acceptance and voucher bookings.
+  * Query Optimization: N+1 loops, missing indexes, unbounded queries.
+  * Resource leaks: connection pool limits, SSE listener cleanup.
 
 * **Phase 3: Architecture, SOLID, Resilience & Lifecycle**
-  * **Lifecycle & Timezones:** Verifying cron jobs are DST-safe and timezone-resilient.
-  * **SOLID & Error Handling:** Checking structured JSON error logs (preventing database query leaks to the client) and fail-fast startup validations for missing environment variables.
-  * **Desktop Integration:** Electron IPC bridge security (`contextIsolation`, `nodeIntegration`).
+  * Lifecycle & Timezones: DST-safe cron jobs, timezone-resilient scheduling.
+  * SOLID & Error Handling: structured JSON error logs (no DB query leaks to client), fail-fast env var validation at startup.
+  * Desktop Integration: Electron IPC bridge security (`contextIsolation`, `nodeIntegration`).
 
 ---
 
 ## How to Use
 
-1. **Install:** Save `SKILL.md` into `~/.claude/skills/forensic-audit/SKILL.md` (create the folder if needed). Restart your agent session - the skill becomes available as `/forensic-audit`.
-2. **Invoke with a defined scope:** Trigger it for one file (or one tightly-related file group) at a time - e.g. "/forensic-audit on src/routes/auth.ts". See Scope Discipline in SKILL.md - never point it at an entire repository in one pass.
-3. **Read the report:** Each phase is written to a timestamped report in %USERPROFILE%\Desktop\_Reports\<timestamp>\ - never inside the project repository.
-4. **Auditing a whole codebase?** See "Orchestrating a File-by-File Forensic Audit" below - generate a task list first, then run it one file at a time.
+1. **Install:** Save `SKILL.md` into `~/.claude/skills/forensic-audit/SKILL.md`. Restart your agent session — the skill becomes available as `/forensic-audit`.
+2. **Invoke with a defined scope:** One file or tightly-related file group at a time — e.g. `/forensic-audit on src/routes/auth.ts`. See Scope Discipline in SKILL.md — never point it at an entire repository in one pass.
+3. **Read the report:** Each phase is written to a timestamped report in `%USERPROFILE%\Desktop\_Reports\<timestamp>\` (Windows) or `~/Desktop/_Reports/<timestamp>/` (Linux/macOS) — never inside the project repository.
+4. **Auditing a whole codebase?** See the pipeline section below — generate a task list first, then run it one file at a time.
 
 ---
 
-## 📋 Orchestrating a File-by-File Forensic Audit (Multi-Agent Pipeline)
+## Orchestrating a File-by-File Forensic Audit (Multi-Agent Pipeline)
 
-For complex backend APIs or infrastructure codebases, doing a single repository scan for security flaws can miss subtle bugs (like a missing `await` before a database transaction or a missing TOTP replay guard). 
+For complex backend APIs, a single repository scan can miss subtle bugs (missing `await` before a DB transaction, a missing TOTP replay guard). The template in [tasks-forensic-example.md](./tasks-forensic-example.md) implements a file-by-file pipeline with dual-run for high-risk files.
 
-To ensure maximum focus and precision, we use a **File-by-File Forensic Audit Pipeline**. The template is provided in [tasks-forensic-example.md](./tasks-forensic-example.md).
-
-### How to use this strategy:
-
-1. **Ask the Agent to Scan & List:** 
-   Feed the codebase to your AI assistant and ask it to scan the project files, identify all critical security endpoints, database services, schemas, and configurations, and generate a task list formatted like `tasks-forensic-example.md`. The LLM should determine which files are high-risk (auth, payments, crypto) and mark them for dual-run.
-2. **Parallel Task Execution:**
-   Instruct the orchestrator agent to spawn ALL `runA`/`runB` subagent tasks concurrently in a single batch. Each subagent operates in an isolated context, reads its target file, runs `/forensic-audit`, and writes its `FINAL.md`.
-3. **Pipelined Merging (orchestrator does this directly):**
-   As soon as both `runA` and `runB` for a dual-run scope complete, the orchestrator immediately merges them into `MERGED.md` — keeping the higher severity for shared findings and tagging unique ones. **Do not delegate merges** — the orchestrator handles this faster than spawning another subagent.
-4. **Progress Logging:**
-   The orchestrator updates `00_PROGRESS.md` with finding counts (`CRITICAL`/`HIGH`/`MEDIUM`/`LOW`) after each subagent completes its task.
-5. **Consolidate to Master Report (orchestrator does this directly):**
-   Once all tasks are done, the orchestrator reads all reports, deduplicates cross-file patterns, and outputs a consolidated `AUDIT_FINAL.md` sorted by severity. **Do not delegate the final merge** — only the orchestrator has full cross-file context for deduplication.
+1. Ask the agent to scan and generate a task list — identifying high-risk files (auth, payments, crypto) for dual-run.
+2. Launch all `runA`/`runB` subagents concurrently in a single batch.
+3. Merge each pair yourself as they complete (no subagent for merge).
+4. Consolidate to `AUDIT_FINAL.md` with severity rollup and cross-file deduplication.
 
 ---
 
-## 💻 Default Technology Stack
+## Default Technology Stack
 
-The default searches and rules in `SKILL.md` are set up for:
+`SKILL.md` search patterns target:
 * **Backend:** Fastify API, JWT plugin, TOTP verification, Server-Sent Events (SSE).
 * **Database & ORM:** Prisma ORM, PostgreSQL.
 * **Desktop Client:** Electron IPC bridges (`ipcMain`, `ipcRenderer`).
-* **Integrations:** Stripe SDK (Billing), Twilio SDK.
+* **Integrations:** Stripe SDK, Twilio SDK.
 
----
+## Custom Stack Adaptation
 
-## 🔄 Custom Stack Adaptation
+Replace Prisma/Fastify-specific patterns in `SKILL.md`:
+1. **Search queries:** Update ORM method names (e.g. `prisma.findMany()` → Sequelize `.findAll()` or Django `.objects.all()`).
+2. **Security rules:** Replace JWT/Stripe checkpoints with your stack's auth middleware and payment library.
+3. **Transaction patterns:** Adjust to match Spring `@Transactional`, Django `transaction.atomic()`, etc.
 
-This skill is framework-agnostic. You can easily adapt it to any other technology stack (e.g., Python/Django, Go, Ruby on Rails, Express/Sequelize) by editing `SKILL.md` and modifying:
-1. **Search queries (Ripgrep / Grep):** Update directory structures and ORM queries (e.g., change `prisma.findMany()` to match Sequelize, Mongoose, or Hibernate syntax).
-2. **Security & Cryptography rules:** Replace the JWT/Stripe validation checkpoints with the specific libraries and middleware configuration of your chosen stack.
-3. **Database transaction patterns:** Adjust checking rules to match your framework's transaction controls (e.g., Spring `@Transactional`, Django `transaction.atomic()`).
+## Known Limitations
+
+- Findings are based on static code analysis — runtime behavior (actual race conditions under load, memory leaks in production) requires profiling, not audit.
+- Stack-specific patterns (Prisma, Fastify, Electron, Stripe) may not match other architectures — adapt search patterns before running.
+- Dual-run reduces false positives but does not eliminate them. Always verify `file:line` before treating a finding as confirmed.
+- Security findings flagged here are surface-level. For penetration testing or formal security assessment, use a dedicated security expert.
+- Severity ratings reflect likely exploitability in the reference stack context, not a formal CVSS score.
